@@ -1,0 +1,5 @@
+@mixin below($width, $orientation: 'width') {
+  @media screen and (max-#{$orientation}: $width) {
+    @content;
+  }
+}
