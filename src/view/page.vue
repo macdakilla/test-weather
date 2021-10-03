@@ -64,7 +64,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import getWeather from '../core/getWeather'
 
 export default {
   name: 'weather',
@@ -77,19 +77,19 @@ export default {
   data () {
     return {
       isOpenAddPopup: false,
-      weatherList: []
+      weatherList: [],
+      citiesList: []
     }
   },
   mounted () {
     if (localStorage.weatherList) {
       let savedCities = localStorage.weatherList
       savedCities = savedCities.split(';')
+      savedCities.pop()
       savedCities.forEach(elem => {
-        axios
-          .get(`https://api.openweathermap.org/data/2.5/weather?units=metric&lang=en&APPID=8852c3ddb393e3e60aa0c159aaa0b762&q=${elem}`)
-          .then(resp => {
-            this.weatherList.push(resp.data)
-          })
+        getWeather(elem, resp => {
+          this.weatherList.push(resp.data)
+        })
       })
     }
   },
@@ -98,19 +98,18 @@ export default {
       this.isOpenAddPopup = true
     },
     addCard (city) {
-      axios
-        .get(`https://api.openweathermap.org/data/2.5/weather?units=metric&lang=en&APPID=8852c3ddb393e3e60aa0c159aaa0b762&q=${city}`)
-        .then(resp => {
-          this.weatherList.push(resp.data)
-          this.isOpenAddPopup = false
-          if (localStorage.weatherList) {
-            localStorage.weatherList += `${resp.data.name};`
-          } else {
-            localStorage.weatherList = `${resp.data.name};`
-          }
-        }).catch(() => {
-          this.isOpenAddPopup = true
-        })
+      if (localStorage.weatherList && localStorage.weatherList.indexOf(city) !== -1) { return }
+      getWeather(city, resp => {
+        this.weatherList.push(resp.data)
+        this.isOpenAddPopup = false
+        if (localStorage.weatherList) {
+          localStorage.weatherList += `${resp.data.name};`
+        } else {
+          localStorage.weatherList = `${resp.data.name};`
+        }
+      }, () => {
+        this.isOpenAddPopup = true
+      })
     },
     removeCard (name) {
       this.weatherList = this.weatherList.filter(item => item.name !== name)

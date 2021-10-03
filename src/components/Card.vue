@@ -32,8 +32,8 @@
 </template>
 
 <script>
-import axios from 'axios'
 import moment from 'moment'
+import getWeather from '@/core/getWeather'
 
 export default {
   name: 'Card',
@@ -69,20 +69,21 @@ export default {
   },
   mounted () {
     setInterval(() => {
-      this.date = moment(this.currentDate).fromNow()
+      this.updateTime()
     }, 60000)
   },
   methods: {
+    updateTime () {
+      this.date = moment(this.currentDate).fromNow()
+    },
     reloadCard () {
       this.loader = true
-      axios
-        .get(`https://api.openweathermap.org/data/2.5/weather?units=metric&lang=en&APPID=8852c3ddb393e3e60aa0c159aaa0b762&q=${this.item.name}`)
-        .then(resp => {
-          this.thisWeather = resp.data
-          this.loader = false
-          this.currentDate = new Date()
-          this.date = moment(this.currentDate).fromNow()
-        })
+      getWeather(this.item.name, resp => {
+        this.thisWeather = resp.data
+        this.loader = false
+        this.currentDate = new Date()
+        this.date = moment(this.currentDate).fromNow()
+      })
     }
   }
 }
