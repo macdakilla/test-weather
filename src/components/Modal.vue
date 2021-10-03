@@ -66,7 +66,6 @@ export default {
     addCity () {
       this.$emit('addCity', this.city)
       this.city = ''
-      this.close()
     }
   }
 }

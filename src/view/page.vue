@@ -11,7 +11,7 @@
             v-for="(item, i) in weatherList">
             <div class="weather__currentCardWrapper"
                  :key="i"
-                 v-if="i === 0"
+                 v-if="i === weatherList.length - 1"
             >
               <Card
                 class="weather__currentCard"
@@ -65,6 +65,7 @@
 
 <script>
 import axios from 'axios'
+
 export default {
   name: 'weather',
   components: {
@@ -80,6 +81,17 @@ export default {
     }
   },
   mounted () {
+    if (localStorage.weatherList) {
+      let savedCities = localStorage.weatherList
+      savedCities = savedCities.split(';')
+      savedCities.forEach(elem => {
+        axios
+          .get(`https://api.openweathermap.org/data/2.5/weather?units=metric&lang=en&APPID=8852c3ddb393e3e60aa0c159aaa0b762&q=${elem}`)
+          .then(resp => {
+            this.weatherList.push(resp.data)
+          })
+      })
+    }
   },
   methods: {
     openAddPopup () {
@@ -90,10 +102,19 @@ export default {
         .get(`https://api.openweathermap.org/data/2.5/weather?units=metric&lang=en&APPID=8852c3ddb393e3e60aa0c159aaa0b762&q=${city}`)
         .then(resp => {
           this.weatherList.push(resp.data)
+          this.isOpenAddPopup = false
+          if (localStorage.weatherList) {
+            localStorage.weatherList += `${resp.data.name};`
+          } else {
+            localStorage.weatherList = `${resp.data.name};`
+          }
+        }).catch(() => {
+          this.isOpenAddPopup = true
         })
     },
     removeCard (name) {
       this.weatherList = this.weatherList.filter(item => item.name !== name)
+      localStorage.weatherList = localStorage.weatherList.replace(`${name};`, '')
     }
   }
 }
@@ -155,15 +176,16 @@ export default {
       padding-bottom: 20px;
     }
   }
+
   &__currentCardWrapper {
     width: 100%;
     margin-bottom: 80px;
+    order: -1;
   }
 
   &__later {
     margin: 0 -20px;
     display: flex;
-    flex-wrap: wrap;
     flex-wrap: wrap;
     @include below($tablet) {
       margin-top: 20px;
@@ -182,6 +204,7 @@ export default {
       margin: 0 20px 20px;
     }
   }
+
   &__empty {
     font-size: 36px;
     text-align: center;

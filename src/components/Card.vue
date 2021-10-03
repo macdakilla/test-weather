@@ -81,6 +81,7 @@ export default {
           this.thisWeather = resp.data
           this.loader = false
           this.currentDate = new Date()
+          this.date = moment(this.currentDate).fromNow()
         })
     }
   }

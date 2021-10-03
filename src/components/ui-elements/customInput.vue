@@ -23,13 +23,10 @@
       >
     </label>
     <div class="inputWrapper__error" v-if="required">Choose a city</div>
-    <div class="inputWrapper__error" v-else-if="unknown">This city does not find</div>
   </div>
 </template>
 
 <script>
-import { required, minLength } from 'vuelidate/lib/validators'
-
 export default {
   name: 'customInput',
   props: {
@@ -44,16 +41,6 @@ export default {
     required: {
       type: Boolean,
       default: false
-    },
-    unknown: {
-      type: Boolean,
-      default: false
-    }
-  },
-  validations: {
-    value: {
-      required,
-      minLength: minLength(4)
     }
   },
   mounted () {
