@@ -102,6 +102,14 @@ export default {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    @include below($tablet) {
+      width: calc(70%);
+      padding: 18px;
+    }
+    @include below($mobileLrg) {
+      width: calc(100% - 20px);
+      padding: 14px;
+    }
   }
   &__title {
     font-weight: 700;

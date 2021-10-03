@@ -25,6 +25,9 @@
     <Btn @click="reloadCard">Reload</Btn>
     <Btn v-if="!hideRemove" @click="$emit('removeCard', thisWeather.name)">Remove</Btn>
   </div>
+  <div class="card__loader" v-if="loader">
+    <svg-icon name="loader" class="card__loaderIcon" />
+  </div>
 </div>
 </template>
 
@@ -35,7 +38,8 @@ import moment from 'moment'
 export default {
   name: 'Card',
   components: {
-    Btn: () => import('@/components/ui-elements/btn')
+    Btn: () => import('@/components/ui-elements/btn'),
+    SvgIcon: () => import('@/components/ui-elements/SvgIcon')
   },
   props: {
     item: {
@@ -58,15 +62,25 @@ export default {
       thisWeather: {
         ...this.item
       },
-      date: moment().startOf('minute').fromNow()
+      currentDate: new Date(),
+      date: moment(this.currentDate).fromNow(),
+      loader: false
     }
+  },
+  mounted () {
+    setInterval(() => {
+      this.date = moment(this.currentDate).fromNow()
+    }, 60000)
   },
   methods: {
     reloadCard () {
+      this.loader = true
       axios
         .get(`https://api.openweathermap.org/data/2.5/weather?units=metric&lang=en&APPID=8852c3ddb393e3e60aa0c159aaa0b762&q=${this.item.name}`)
         .then(resp => {
           this.thisWeather = resp.data
+          this.loader = false
+          this.currentDate = new Date()
         })
     }
   }
@@ -78,6 +92,8 @@ export default {
   background: $white;
   box-shadow: 0px 2px 10px rgba(10, 10, 10, 0.25);
   padding: 24px;
+  position: relative;
+  overflow: hidden;
   border-radius: 6px;
   @include below($mobileLrg) {
     padding: 18px;
@@ -121,6 +137,30 @@ export default {
     display: flex;
     flex-direction: row-reverse;
     justify-content: space-between;
+  }
+  &__loader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  &__loaderIcon {
+    width: 60px;
+    height: 60px;
+    animation: rotate 1s infinite;
+  }
+}
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }
 </style>
